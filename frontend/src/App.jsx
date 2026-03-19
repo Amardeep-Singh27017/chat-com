@@ -1,0 +1,29 @@
+import Login from "./login/Login.jsx"
+import Register from "./register/Register.jsx"
+import { ToastContainer } from 'react-toastify';
+import { Route, Routes } from "react-router-dom";
+import Home from "./home/Home.jsx";
+import { VerifyUser } from "./utils/VerifyUser.jsx";
+
+
+function App() {
+
+  return (
+    <>
+      <div className="h-screen flex justify-center items-center overflow-hidden">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          <Route element={<VerifyUser />}>
+            <Route path="/" element={<Home />} />
+          </Route>
+          
+        </Routes>
+        <ToastContainer />
+      </div>
+    </>
+  )
+}
+
+export default App
