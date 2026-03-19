@@ -7,7 +7,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import Spinner from './Spinner';
 import notifySound from '../../assets/sound/notificationSound.mp3'
-import { useSocketContext } from '../../context/SocketContext';
+import { useSocketContext } from '../../context/SocketContext.jsx';
 import useUIStore from '../../Zustand/openCloseSidebar';
 
 
