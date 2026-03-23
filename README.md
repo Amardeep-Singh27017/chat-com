@@ -148,7 +148,6 @@ chat-com/
     ├── public/
     ├── src/
     │   ├── assets/
-    │   ├── chatarea/
     │   ├── context/
     │   ├── home/
     │   ├── login/
