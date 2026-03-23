@@ -183,3 +183,10 @@ chat-com/
 - UI components from DaisyUI
 - Icons from React Icons</content>
 <parameter name="filePath">c:\Users\Admin\Desktop\chat-com\README.md
+
+
+![Alt Text](./assets/Mobileview.jpeg)
+![Alt Text](./assets/Mobileview_1.jpeg)
+![Alt Text](./assets/Mobileview_2.jpeg)
+![Alt Text](./assets/Mobileview_3.jpeg)
+![Alt Text](./assets/Mobileview_4.jpeg)
