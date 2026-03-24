@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 
-const isLoggedIn = async (req, res, next) => {
+const isLoggedIn = (req, res, next) => {
     try {
         const token = req.cookies.jwt;
         if (!token) {
@@ -17,14 +17,14 @@ const isLoggedIn = async (req, res, next) => {
                 message: "User not logged in, Invalid token!"
             });
         }
-        const user = await User.findById(decoded.userId).select("-password")
+        const user = User.findById(decoded.userId).select("-password")
         if (!user) {
             return res.status(500).json({
                 success: false,
                 message: "User not found!"
             });
         }
-        req.user = user;
+        req.user = user
         next()
     } catch (error) {
         return res.status(500).json({

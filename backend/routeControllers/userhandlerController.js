@@ -58,9 +58,7 @@ export const getCurrentChatters = async (req, res) => {
 
         const user = await User.find({ _id: { $in: otherParticipentsIDS } }).select("-password").select("-email");
 
-        const users = otherParticipentsIDS
-            .map(id => user.find(user => user._id.toString() === id.toString()))
-            .filter(Boolean); // remove null/undefined entries
+        const users = otherParticipentsIDS.map(id => user.find(user => user._id.toString() === id.toString()));
 
         res.status(200).send(users)
 
