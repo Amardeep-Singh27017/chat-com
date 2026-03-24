@@ -232,7 +232,7 @@ const Sidebar = () => {
                                             : "bg-white/50 hover:bg-white/70"
                                         }`}
                                 >
-                                    <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-purple-300/60">
+                                    <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-purple-300/60">
                                         {user.profilepic ? (
                                             <img
                                                 src={user.profilepic}
