@@ -35,7 +35,7 @@ const Sidebar = () => {
     }, [socket, messages]);
 
     // online function and code
-    const nowOnline = chatUser.map((user) => user._id);
+    const nowOnline = chatUser.filter(Boolean).map((user) => user?._id);
 
     const isOnline = nowOnline.map((userId) => onlineUser.includes(userId));
 
@@ -59,26 +59,34 @@ const Sidebar = () => {
         chatUserHandler();
     }, []);
 
-    const handleSearchSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            const search = await axios.get(`/api/user/search?search=${searchInput}`);
-            const data = search.data;
-            if (data.success === false) {
-                setLoading(false);
-                toast.info(data.message);
+    useEffect(() => {
+        const delay = setTimeout(async () => {
+            setLoading(true);
+            if (!searchInput.trim()) {
+                setSetsearchUser([]);
+                return;
             }
-            if (data.length === 0) {
-                toast.info("User not Found!");
-            } else {
+            try {
+                const res = await axios.get(`/api/user/search?search=${searchInput.trim()}`);
+                const data = res.data;
                 setSetsearchUser(data);
+                if (data.success === false) {
+                    setLoading(false);
+                    toast.info(data.message);
+                } else if (data.length === 0) {
+                    setLoading(false);
+                    toast.info("User not Found!");
+                }
+            } catch (error) {
+                setLoading(false);
+                toast.error(error.message);
             }
-        } catch (error) {
-            setLoading(false);
-            toast.error(error.message);
-        }
-    };
+        }, 300);
+
+        return () => clearTimeout(delay);
+
+    }, [searchInput]);
+
 
     const handleUserClick = (user) => {
         setSelectedConversation(user);
@@ -129,9 +137,7 @@ const Sidebar = () => {
                 </h1>
 
                 <div className="flex justify-between gap-2 px-2">
-                    <form
-                        onSubmit={handleSearchSubmit}
-                        className="w-full flex items-center pl-3 pr-2 py-1 bg-white/50 backdrop-blur-md rounded-full shadow-sm border border-white/30"
+                    <form className="w-full flex items-center pl-3 pr-2 py-1 bg-white/50 backdrop-blur-md rounded-full shadow-sm border border-white/30"
                     >
                         <input
                             value={searchInput}
@@ -201,7 +207,7 @@ const Sidebar = () => {
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto max-h-[calc(100vh-160px)] px-1">
-                            {searchUser.map((user, index) => (
+                            {searchUser.filter(Boolean).map((user, index) => (
                                 <div
                                     onClick={() => {
                                         handleUserClick(user);
@@ -274,13 +280,13 @@ const Sidebar = () => {
                             <>
                                 {/* when chatters present and i also chated with him */}
                                 <div className="flex-1 overflow-y-auto max-h-[calc(100vh-160px)] px-1">
-                                    {chatUser.map((user, index) => (
+                                    {chatUser.filter(Boolean).map((user, index) => (
                                         <div
                                             onClick={() => {
                                                 handleUserClick(user, isOnline);
                                                 closeSidebar();
                                             }}
-                                            key={user._id}
+                                            key={user?._id || index}
                                             className={`flex relative items-center gap-3 p-3 mx-1 mt-1 border-b
                                          border-white/30 shadow-sm backdrop-blur-md cursor-pointer rounded-b-xl
                                          transition-colors
