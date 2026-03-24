@@ -21,14 +21,22 @@ const Sidebar = () => {
         userConversation();
     const navigate = useNavigate();
     const { onlineUser, socket } = useSocketContext();
-    const [newMessagesUsers, setNewMessagesUsers] = useState(null);
+    const [newMessagesUsers, setNewMessagesUsers] = useState([]);
     const { closeSidebar } = useUIStore();
 
-    // only check a new messsage comes
+    // unread message tracker for +1 badge
     useEffect(() => {
         if (!socket) return;
         const handleNewMessage = (newMessage) => {
-            setNewMessagesUsers(newMessage);
+            if (!newMessage || !newMessage.senderId || !newMessage.receiverId) return;
+
+            // mark sender as having unread messages for current user
+            if (newMessage.receiverId === authUser?._id) {
+                setNewMessagesUsers((prev) => {
+                    const exists = prev.includes(newMessage.senderId);
+                    return exists ? prev : [...prev, newMessage.senderId];
+                });
+            }
         };
         socket.on("newMessage", handleNewMessage);
         return () => socket.off("newMessage", handleNewMessage);
@@ -59,31 +67,41 @@ const Sidebar = () => {
         chatUserHandler();
     }, []);
 
-    const handleSearchSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            const search = await axios.get(`/api/user/search?search=${searchInput}`);
-            const data = search.data;
-            if (data.success === false) {
+
+    useEffect(() => {
+        const delay = setTimeout(async () => {
+            setLoading(true);
+            if (!searchInput.trim()) {
+                setSetsearchUser([]);
+                return;
+            }
+            try {
+                const res = await axios.get(`/api/user/search?search=${searchInput.trim()}`);
+                const data = res.data;
+                if (data.success === false) {
+                    setLoading(false);
+                    toast.info(data.message);
+                }
+                if (data.length === 0) {
+                    toast.info("User not Found!");
+                } else {
+                    setSetsearchUser(data);
+                }
+            } catch (error) {
                 setLoading(false);
-                toast.info(data.message);
+                toast.error(error.message);
             }
-            if (data.length === 0) {
-                toast.info("User not Found!");
-            } else {
-                setSetsearchUser(data);
-            }
-        } catch (error) {
-            setLoading(false);
-            toast.error(error.message);
-        }
-    };
+        }, 300);
+
+        return () => clearTimeout(delay);
+
+    }, [searchInput]);
+
 
     const handleUserClick = (user) => {
         setSelectedConversation(user);
         setselectedUserId(user._id);
-        setNewMessagesUsers("");
+        setNewMessagesUsers((prev) => prev.filter((senderId) => senderId !== user._id));
     };
 
     const backSearch = () => {
@@ -129,9 +147,7 @@ const Sidebar = () => {
                 </h1>
 
                 <div className="flex justify-between gap-2 px-2">
-                    <form
-                        onSubmit={handleSearchSubmit}
-                        className="w-full flex items-center pl-3 pr-2 py-1 bg-white/50 backdrop-blur-md rounded-full shadow-sm border border-white/30"
+                    <form className="w-full flex items-center pl-3 pr-2 py-1 bg-white/50 backdrop-blur-md rounded-full shadow-sm border border-white/30"
                     >
                         <input
                             value={searchInput}
@@ -331,14 +347,10 @@ const Sidebar = () => {
 
                                             {/* notification badge  */}
                                             <div>
-                                                {newMessagesUsers &&
-                                                    newMessagesUsers.recieverId === authUser._id &&
-                                                    newMessagesUsers.senderId === user._id ? (
+                                                {newMessagesUsers.includes(user._id) && (
                                                     <div className="rounded-full bg-green-500 text-white px-[4px] text-sm">
                                                         +1
                                                     </div>
-                                                ) : (
-                                                    <></>
                                                 )}
                                             </div>
                                         </div>
