@@ -28,10 +28,13 @@ const Sidebar = () => {
     useEffect(() => {
         if (!socket) return;
         const handleNewMessage = (newMessage) => {
-            if (!newMessage || !newMessage.senderId || !newMessage.receiverId) return;
+            if (!newMessage || !newMessage.senderId) return;
+
+            const receiverId = newMessage.receiverId || newMessage.recieverId;
+            if (!receiverId) return;
 
             // mark sender as having unread messages for current user
-            if (newMessage.receiverId === authUser?._id) {
+            if (receiverId === authUser?._id) {
                 setNewMessagesUsers((prev) => {
                     const exists = prev.includes(newMessage.senderId);
                     return exists ? prev : [...prev, newMessage.senderId];
