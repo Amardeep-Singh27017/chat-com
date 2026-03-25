@@ -31,15 +31,35 @@ const Sidebar = () => {
         const handleNewMessage = (newMessage) => {
             if (!newMessage || !newMessage.senderId) return;
 
+            const senderId = newMessage.senderId;
             const receiverId = newMessage.receiverId || newMessage.recieverId;
-            if (!receiverId) return;
 
-            // mark sender as having unread messages for current user
+            // Only update if current user is receiver
             if (receiverId === authUser?._id) {
-                setNewMessagesUsers((prev) => ({
-                    ...prev,
-                    [newMessage.senderId]: (prev[newMessage.senderId] || 0) + 1
-                }));
+
+                // MOVE USER TO TOP
+                setChatuser((prevUsers) => {
+                    const updatedUsers = [...prevUsers];
+
+                    const index = updatedUsers.findIndex(
+                        (u) => u && u._id === senderId
+                    );
+
+                    if (index !== -1) {
+                        const [user] = updatedUsers.splice(index, 1); // remove
+                        updatedUsers.unshift(user); // add to top
+                    }
+
+                    return updatedUsers;
+                });
+
+                // unread logic (skip if chat open)
+                if (selectedConversation?._id !== senderId) {
+                    setNewMessagesUsers((prev) => ({
+                        ...prev,
+                        [senderId]: (prev[senderId] || 0) + 1,
+                    }));
+                }
             }
         };
         socket.on("newMessage", handleNewMessage);
@@ -313,20 +333,20 @@ const Sidebar = () => {
                                          border-white/30 shadow-sm backdrop-blur-md cursor-pointer rounded-b-xl
                                          transition-colors
                                          ${selectedUserId === user._id
-                                                    ? "bg-purple-200"
-                                                    : "bg-white/50 hover:bg-white/70"
-                                                }`}
-                                        >
-                                            <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-purple-300/60">
-                                                {user.profilepic ? (
-                                                    <img
-                                                        src={user.profilepic}
-                                                        alt="user"
-                                                        className="w-full h-full rounded-full object-cover ring-2 ring-purple-300"
-                                                    />
-                                                ) : (
-                                                    <span
-                                                        className="
+                                                        ? "bg-purple-200"
+                                                        : "bg-white/50 hover:bg-white/70"
+                                                    }`}
+                                            >
+                                                <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-purple-300/60">
+                                                    {user.profilepic ? (
+                                                        <img
+                                                            src={user.profilepic}
+                                                            alt="user"
+                                                            className="w-full h-full rounded-full object-cover ring-2 ring-purple-300"
+                                                        />
+                                                    ) : (
+                                                        <span
+                                                            className="
                                                                flex items-center justify-center
                                                                w-full h-full
                                                                rounded-full
@@ -337,36 +357,36 @@ const Sidebar = () => {
                                                                uppercase
                                                                select-none
                                                               "
-                                                    >
-                                                        {user?.fullname?.trim().charAt(0)}
-                                                    </span>
-                                                )}
+                                                        >
+                                                            {user?.fullname?.trim().charAt(0)}
+                                                        </span>
+                                                    )}
 
-                                                {/* Online Dot */}
-                                                {isOnline[index] && (
-                                                    <span className="absolute top-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full animate-pulse" />
-                                                )}
-                                            </div>
+                                                    {/* Online Dot */}
+                                                    {isOnline[index] && (
+                                                        <span className="absolute top-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full animate-pulse" />
+                                                    )}
+                                                </div>
 
-                                            <div className="flex-1 overflow-hidden">
-                                                <h2 className="text-xs sm:text-sm font-semibold text-gray-800 truncate">
-                                                    {user.fullname}
-                                                </h2>
-                                                <p className="text-[10px] sm:text-xs text-gray-600 truncate">
-                                                    Hey! How are you doing?
-                                                </p>
-                                            </div>
+                                                <div className="flex-1 overflow-hidden">
+                                                    <h2 className="text-xs sm:text-sm font-semibold text-gray-800 truncate">
+                                                        {user.fullname}
+                                                    </h2>
+                                                    <p className="text-[10px] sm:text-xs text-gray-600 truncate">
+                                                        Hey! How are you doing?
+                                                    </p>
+                                                </div>
 
-                                            {/* notification badge  */}
-                                            <div>
-                                                {newMessagesUsers[user._id] && (
-                                                    <div className="rounded-full bg-green-500 text-white px-[6px] text-xs">
-                                                        +{newMessagesUsers[user._id]}
-                                                    </div>
-                                                )}
+                                                {/* notification badge  */}
+                                                <div>
+                                                    {newMessagesUsers[user._id] && (
+                                                        <div className="rounded-full bg-green-500 text-white px-[6px] text-xs">
+                                                            +{newMessagesUsers[user._id]}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
                                 </div>
                             </>
                         )}
