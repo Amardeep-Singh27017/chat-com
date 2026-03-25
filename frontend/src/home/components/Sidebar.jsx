@@ -47,7 +47,9 @@ const Sidebar = () => {
     }, [socket, messages]);
 
     // online function and code
-    const nowOnline = chatUser.map((user) => user._id);
+    const nowOnline = chatUser
+        .filter((user) => user && user._id)
+        .map((user) => user._id);
 
     const isOnline = nowOnline.map((userId) => onlineUser.includes(userId));
 
@@ -298,14 +300,16 @@ const Sidebar = () => {
                             <>
                                 {/* when chatters present and i also chated with him */}
                                 <div className="flex-1 overflow-y-auto max-h-[calc(100vh-160px)] px-1">
-                                    {chatUser.map((user, index) => (
-                                        <div
-                                            onClick={() => {
-                                                handleUserClick(user, isOnline);
-                                                closeSidebar();
-                                            }}
-                                            key={user._id}
-                                            className={`flex relative items-center gap-3 p-3 mx-1 mt-1 border-b
+                                    {chatUser
+                                        .filter((user) => user && user._id)
+                                        .map((user, index) => (
+                                            <div
+                                                onClick={() => {
+                                                    handleUserClick(user);
+                                                    closeSidebar();
+                                                }}
+                                                key={user._id || index}
+                                                className={`flex relative items-center gap-3 p-3 mx-1 mt-1 border-b
                                          border-white/30 shadow-sm backdrop-blur-md cursor-pointer rounded-b-xl
                                          transition-colors
                                          ${selectedUserId === user._id
