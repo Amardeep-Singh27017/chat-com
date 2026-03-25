@@ -21,7 +21,7 @@ const Sidebar = () => {
         userConversation();
     const navigate = useNavigate();
     const { onlineUser, socket } = useSocketContext();
-    const [newMessagesUsers, setNewMessagesUsers] = useState([]);
+    const [newMessagesUsers, setNewMessagesUsers] = useState({});
     const { closeSidebar } = useUIStore();
 
     // unread message tracker for +1 badge
@@ -35,10 +35,10 @@ const Sidebar = () => {
 
             // mark sender as having unread messages for current user
             if (receiverId === authUser?._id) {
-                setNewMessagesUsers((prev) => {
-                    const exists = prev.includes(newMessage.senderId);
-                    return exists ? prev : [...prev, newMessage.senderId];
-                });
+                setNewMessagesUsers((prev) => ({
+                    ...prev,
+                    [newMessage.senderId]: (prev[newMessage.senderId] || 0) + 1
+                }));
             }
         };
         socket.on("newMessage", handleNewMessage);
@@ -104,7 +104,11 @@ const Sidebar = () => {
     const handleUserClick = (user) => {
         setSelectedConversation(user);
         setselectedUserId(user._id);
-        setNewMessagesUsers((prev) => prev.filter((senderId) => senderId !== user._id));
+        setNewMessagesUsers((prev) => {
+            const updated = { ...prev };
+            delete updated[user._id];
+            return updated;
+        });
     };
 
     const backSearch = () => {
@@ -350,9 +354,9 @@ const Sidebar = () => {
 
                                             {/* notification badge  */}
                                             <div>
-                                                {newMessagesUsers.includes(user._id) && (
-                                                    <div className="rounded-full bg-green-500 text-white px-[4px] text-sm">
-                                                        +1
+                                                {newMessagesUsers[user._id] && (
+                                                    <div className="rounded-full bg-green-500 text-white px-[6px] text-xs">
+                                                        +{newMessagesUsers[user._id]}
                                                     </div>
                                                 )}
                                             </div>
