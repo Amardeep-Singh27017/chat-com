@@ -16,7 +16,12 @@ export const SocketContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (authUser?._id) {
-      const newSocket = io("https://chat-app-htcu.onrender.com/", {
+      const SOCKET_URL =
+        import.meta.env.MODE === "development"
+          ? "http://localhost:5000"
+          : "https://chat-app-htcu.onrender.com";
+
+      const newSocket = io(SOCKET_URL, {
         query: {
           userId: authUser._id,
         },

@@ -1,8 +1,10 @@
-import axios from "axios";
+// import axios from "axios";
+import axios from "../utils/axios"
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
+
 
 export default function Register() {
   const navigate = useNavigate();

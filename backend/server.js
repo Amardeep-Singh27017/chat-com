@@ -11,13 +11,25 @@ import userRouter from "./routes/userRoute.js"
 import { app, server } from "./socket/socket.js";
 import path from "path";
 
+import cors from "cors";
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",              // development
+      "https://chat-app-htcu.onrender.com"  // production
+    ],
+    credentials: true
+  })
+);
+
 const __dirname = path.resolve();
 
 dotenv.config();
 
 connectDB();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(cookieParser());
@@ -37,5 +49,5 @@ app.use((req, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Server started on http://localhost:${PORT}`);
+  console.log(`Server started on http://localhost:${PORT}`);
 });

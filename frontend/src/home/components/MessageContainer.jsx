@@ -3,7 +3,8 @@ import ChatHeader from './ChatHeader'
 import ChatInput from './ChatInput'
 import userConversation from '../../Zustand/useConversation';
 import { useAuth } from '../../context/AuthContext'
-import axios from 'axios';
+// import axios from 'axios';
+import axios from "../../utils/axios.jsx";
 import { toast } from 'react-toastify';
 import Spinner from './Spinner';
 import notifySound from '../../assets/sound/notificationSound.mp3'

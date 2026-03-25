@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { toast } from 'react-toastify'
 import userConversation from '../../Zustand/useConversation';
-import axios from 'axios';
+// import axios from 'axios';
+import axios from "../../utils/axios.jsx";
 
 const ChatInput = () => {
     const { messages, selectedConversation, setMessages, setSelectedConversation } = userConversation();

@@ -1,4 +1,5 @@
-import axios from "axios";
+// import axios from "axios";
+import axios from "../../utils/axios.jsx";
 import React, { useEffect, useState } from "react";
 import { FaArrowLeft, FaSearch } from "react-icons/fa";
 import { toast } from "react-toastify";
