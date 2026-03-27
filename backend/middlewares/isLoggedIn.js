@@ -4,7 +4,6 @@ import User from "../models/userModel.js";
 const isLoggedIn = async (req, res, next) => {
     try {
         const token = req.cookies.jwt;
-        console.log("[isLoggedIn] Token present:", !!token);
 
         if (!token) {
             return res.status(401).json({
@@ -14,7 +13,6 @@ const isLoggedIn = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log("[isLoggedIn] Decoded userId:", decoded?.userId);
 
         if (!decoded || !decoded.userId) {
             return res.status(401).json({
@@ -24,7 +22,6 @@ const isLoggedIn = async (req, res, next) => {
         }
 
         const user = await User.findById(decoded.userId).select("-password");
-        console.log("[isLoggedIn] User found:", user ? user._id : null);
 
         if (!user) {
             return res.status(404).json({
