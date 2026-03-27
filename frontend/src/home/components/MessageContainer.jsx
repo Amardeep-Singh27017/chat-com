@@ -197,7 +197,7 @@ const MessageContainer = () => {
 
                                     <div
                                         className={`
-                                relative px-3 sm:px-4 py-2
+                                relative px-3 sm:px-4 py-2 mb-2 sm:mb-0
                                 max-w-[85%] sm:max-w-xs md:max-w-sm
                                 text-xs sm:text-sm shadow-md
                                 break-words
