@@ -32,7 +32,6 @@ const MessageContainer = () => {
             ) {
                 const sound = new Audio(notifySound);
                 sound.play();
-                console.log("new messages", messages)
                 setMessages((prev) => {
                     if (!prev) return [newMessage];
 
@@ -100,15 +99,40 @@ const MessageContainer = () => {
                             ☰
                         </button>
                         {/* Icon */}
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 mb-4 sm:mb-5 rounded-full 
-                bg-gradient-to-br from-purple-300 to-indigo-400 
-                flex items-center justify-center shadow-lg">
-                            <span className="text-2xl sm:text-3xl font-bold text-white">💬</span>
+                        <div
+                            className="
+                          relative flex-shrink-0
+                          w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24
+                          rounded-full overflow-hidden
+                          cursor-pointer group
+                        "
+                        >
+                            {/* IMAGE / FALLBACK */}
+                            {authUser.profilepic ? (
+                                <img
+                                    src={authUser?.profilepic}
+                                    alt="user"
+                                    className="w-full h-full object-cover ring-1 ring-gray-300"
+                                />
+                            ) : (
+                                <span
+                                    className="
+                                flex items-center justify-center
+                                w-full h-full
+                                bg-gradient-to-br from-purple-400 to-indigo-500
+                                text-white font-bold
+                                text-base sm:text-lg md:text-xl
+                                uppercase select-none
+                              "
+                                >
+                                    {authUser?.fullname?.trim().charAt(0)}
+                                </span>
+                            )}
                         </div>
 
                         {/* First Name */}
                         <h2 className="text-xl sm:text-3xl font-extrabold text-transparent bg-clip-text 
-                bg-gradient-to-r from-purple-600 to-indigo-600">
+                        bg-gradient-to-r from-purple-600 to-indigo-600">
                             Hii, {authUser?.fullname?.trim().split(" ")[0]}!
                         </h2>
 

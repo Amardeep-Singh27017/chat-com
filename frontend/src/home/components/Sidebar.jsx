@@ -1,7 +1,7 @@
 // import axios from "axios";
 import axios from "../../utils/axios.jsx";
 import React, { useEffect, useState } from "react";
-import { FaArrowLeft, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaCamera, FaSearch } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext";
 import { BiLogOut } from "react-icons/bi";
@@ -16,6 +16,7 @@ const Sidebar = () => {
     const [searchUser, setSetsearchUser] = useState([]);
     const [chatUser, setChatuser] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [uploadLoading, setUploadLoading] = useState(false);
     const [selectedUserId, setselectedUserId] = useState(null);
     const { authUser, setAuthUser } = useAuth();
     const { messages, selectedConversation, setSelectedConversation } =
@@ -24,6 +25,47 @@ const Sidebar = () => {
     const { onlineUser, socket } = useSocketContext();
     const [newMessagesUsers, setNewMessagesUsers] = useState({});
     const { closeSidebar } = useUIStore();
+
+    // upload profile 
+    const [preview, setPreview] = useState(null);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // preview
+        setPreview(URL.createObjectURL(file));
+
+        // upload
+        uploadImage(file);
+    };
+
+    const uploadImage = async (file) => {
+        const formData = new FormData();
+        formData.append("profile", file);
+
+        try {
+            setUploadLoading(true);
+
+            // Don't set Content-Type header - let axios auto-detect multipart
+            const res = await axios.post("/api/auth/upload-profile", formData);
+
+            if (res.data.success && res.data.user) {
+                setAuthUser(res.data.user); // update UI
+                toast.success("Profile picture updated!");
+                setPreview(null); // clear preview after successful upload
+            } else {
+                setPreview(null);
+                toast.error(res.data.message || "Upload failed");
+            }
+        } catch (error) {
+            setPreview(null); // clear failed preview
+            const errMsg = error.response?.data?.message || error.message || "Upload failed";
+            toast.error(errMsg);
+        } finally {
+            setUploadLoading(false);
+        }
+    };
 
     // unread message tracker for +1 badge
     useEffect(() => {
@@ -165,19 +207,19 @@ const Sidebar = () => {
         <>
             <div
                 className="
-          w-full
-    h-full
-    bg-white/40
-    backdrop-blur-lg
-    flex flex-col
-        "
+                              w-full
+                        h-full
+                        bg-white/40
+                        backdrop-blur-lg
+                        flex flex-col
+                            "
             >
                 <h1 className="flex justify-center text-xl sm:text-2xl my-4 font-bold text-purple-900">
                     Chats
                 </h1>
 
-                <div className="flex justify-between gap-2 px-2">
-                    <form className="w-full flex items-center pl-3 pr-2 py-1 bg-white/50 backdrop-blur-md rounded-full shadow-sm border border-white/30"
+                <div className="flex justify-between gap-1 sm:gap-2 px-2">
+                    <form className="w-full flex items-center pl-2 pr-1 py-1 sm:pl-3 sm:pr-2 bg-white/50 backdrop-blur-md rounded-full shadow-sm border border-white/30"
                     >
                         <input
                             value={searchInput}
@@ -189,45 +231,66 @@ const Sidebar = () => {
 
                         <button
                             type="submit"
-                            className="p-2 rounded-full bg-purple-400/70 hover:bg-purple-400 text-white text-xs shadow-sm transition cursor-pointer"
+                            className="p-1 sm:p-2 rounded-full bg-purple-400/70 hover:bg-purple-400 text-white text-xs shadow-sm transition cursor-pointer"
                         >
-                            <FaSearch className="text-gray-500 text-sm" />
+                            <FaSearch className="text-gray-500 text-xs sm:text-sm" />
                         </button>
                     </form>
 
                     <div
-                        onClick={() => navigate(`profile/${authUser._id}`)}
                         className="
-                                 flex-shrink-0
-                                 w-8 h-8 sm:w-10 sm:h-10
-                                 rounded-full
-                                 overflow-hidden
-                                 cursor-pointer
-                                 transition
-                              
-                                 "
+                          relative flex-shrink-0
+                          w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10
+                          rounded-full overflow-hidden
+                          cursor-pointer group
+                        "
                     >
+                        {/* IMAGE / FALLBACK */}
                         {authUser.profilepic ? (
                             <img
-                                src={authUser.profilepic}
+                                src={preview || authUser?.profilepic}
                                 alt="user"
-                                className="w-full h-full object-cover ring-2 ring-purple-300"
+                                className="w-full h-full object-cover ring-1 ring-gray-300"
                             />
                         ) : (
                             <span
                                 className="
-                                 flex items-center justify-center
-                                 w-full h-full
-                                 bg-gradient-to-br from-purple-400 to-indigo-500
-                                 text-white font-bold
-                                 text-lg sm:text-xl
-                                 uppercase
-                                 select-none
-                                "
+                                flex items-center justify-center
+                                w-full h-full
+                                bg-gradient-to-br from-purple-400 to-indigo-500
+                                text-white font-bold
+                                text-base sm:text-lg md:text-xl
+                                uppercase select-none
+                              "
                             >
                                 {authUser?.fullname?.trim().charAt(0)}
                             </span>
                         )}
+
+                        {/* OVERLAY CAMERA ICON */}
+                        <label
+                            className={`
+                                    absolute inset-0 flex items-center justify-center
+                                    bg-black/40 rounded-full transition
+                                    ${uploadLoading ? "opacity-100 cursor-not-allowed" : "opacity-0 group-hover:opacity-100 cursor-pointer"}
+                                  `}
+                        >
+                            {uploadLoading ? (
+                                // LOADING SPINNER
+                                <div className="w-full h-full border-2 border-purple-300 border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                                <FaCamera className="text-white text-xs sm:text-sm" />
+                            )}
+
+                            {/* HIDDEN INPUT */}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleImageChange}
+                                disabled={uploadLoading}
+                            />
+                        </label>
                     </div>
                 </div>
 
@@ -267,7 +330,7 @@ const Sidebar = () => {
                                             <img
                                                 src={user.profilepic}
                                                 alt="user"
-                                                className="w-full h-full rounded-full object-cover ring-2 ring-purple-300"
+                                                className="w-full h-full rounded-full object-cover ring-1 ring-gray-300"
                                             />
                                         ) : (
                                             <span
@@ -342,7 +405,7 @@ const Sidebar = () => {
                                                         <img
                                                             src={user.profilepic}
                                                             alt="user"
-                                                            className="w-full h-full rounded-full object-cover ring-2 ring-purple-300"
+                                                            className="w-full h-full rounded-full object-cover ring-1 ring-gray-300"
                                                         />
                                                     ) : (
                                                         <span

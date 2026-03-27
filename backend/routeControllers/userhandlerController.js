@@ -33,14 +33,14 @@ export const getUserBySearch = async (req, res) => {
 
 export const getCurrentChatters = async (req, res) => {
     try {
-        if (!req.user || !req.user._conditions._id) {
+        if (!req.user || !req.user._id) {
             return res.status(401).send({
                 success: false,
                 message: "Unauthorized"
             });
         }
 
-        const currentUserID = req.user._conditions._id;
+        const currentUserID = req.user._id;
         const currenTChatters = await Conversation.find({
             participants: currentUserID
         }).sort({

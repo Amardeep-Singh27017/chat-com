@@ -13,8 +13,6 @@ export const userRegister = async (req, res) => {
         }
         // password hased 
         const hashPassword = bcryptjs.hashSync(password, 10)
-        const profileBoy = profilepic || `https://avatar.iran.liara.run/public/boy?username=${username}`
-        const profileGirl = profilepic || `https://avatar.iran.liara.run/public/girl?username=${username}`
 
         // now storing in db 
         const newUser = User({

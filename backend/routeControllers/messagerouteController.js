@@ -6,7 +6,14 @@ export const sendMessage = async (req, res) => {
     try {
         const { message } = req.body;
         const { id: recieverId } = req.params;
-        const senderId = req.user._conditions._id || req.user._id;
+        const senderId = req.user?._id;
+
+        if (!senderId || !recieverId) {
+            return res.status(400).json({
+                success: false,
+                message: "Sender or receiver ID missing"
+            });
+        }
 
         // check participants alreday have a conversation cluster or not, if have then add messages inside cluster.
         let chats = await Conversation.findOne({
@@ -58,7 +65,14 @@ export const sendMessage = async (req, res) => {
 export const getMessage = async (req, res) => {
     try {
         const { id: recieverId } = req.params;
-        const senderId = req.user._conditions._id || req.user._id;
+        const senderId = req.user?._id;
+
+        if (!senderId || !recieverId) {
+            return res.status(400).json({
+                success: false,
+                message: "Sender or receiver ID missing"
+            });
+        }
 
         const chats = await Conversation.findOne({
             participants: { $all: [senderId, recieverId] }
