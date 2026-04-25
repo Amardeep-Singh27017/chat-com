@@ -24,6 +24,7 @@ export default function Register() {
     setLoading(true)
     try {
       if (!userInput.gender) {
+        setLoading(false);
         toast.error("Please select gender");
         return;
       }
@@ -39,13 +40,18 @@ export default function Register() {
 
       const { data } = await axios.post("api/auth/register", payload);
 
+      console.log("yes it is working but toast not", data)
       //DIRECT LOGIN AFTER REGISTER
       localStorage.setItem("chatapp", JSON.stringify(data));
       setAuthUser(data) // share data to globle manually
       toast.success("Registered & logged in successfully");
       navigate("/");
     } catch (error) {
-      toast.error(error?.response?.data?.message);
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "User already exists";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

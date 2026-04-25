@@ -3,51 +3,63 @@ import bcryptjs from "bcryptjs"
 import jwtToken from "../utils/jwtwebToken.js";
 
 // userRegister feature 
-
 export const userRegister = async (req, res) => {
     try {
-        const { fullname, username, email, gender, password, profilepic } = req.body
-        const user = await User.findOne({ email, username })
-        if (user) {
-            return res.status(500).send({ success: false, message: "Username or email alredy exist!" })
-        }
-        // password hased 
-        const hashPassword = bcryptjs.hashSync(password, 10)
+        const { fullname, username, email, gender, password, profilepic } = req.body;
 
-        // now storing in db 
-        const newUser = User({
+        const existingUser = await User.findOne({
+            $or: [{ email }, { username }]
+        });
+
+        if (existingUser) {
+            return res.status(400).send({
+                success: false,
+                message: "Username or email already exists!",
+            });
+        }
+
+        const hashPassword = bcryptjs.hashSync(password, 10);
+
+        const newUser = new User({
             fullname,
             username,
             email,
             gender,
             password: hashPassword,
-            profilepic
-        })
-        if (newUser) {
-            await newUser.save();
-            jwtToken(newUser._id, res) // for jwt token generation we send the user id and response.
-        } else {
-            res.status(500).send({ success: false, message: "Invalid user data!" })
-        }
+            profilepic,
+        });
 
-        // after save new user, send data to frontend, not need to send password to frontend. 
+        await newUser.save();
+
+        jwtToken(newUser._id, res);
+
         res.status(201).send({
             _id: newUser._id,
             fullname: newUser.fullname,
             username: newUser.username,
             gender: newUser.gender,
             profilepic: newUser.profilepic,
-            email: newUser.email
-        })
+            email: newUser.email,
+        });
 
     } catch (error) {
+        console.log(error);
+
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern)[0];
+
+            return res.status(400).send({
+                success: false,
+                message: `${field} already exists`,
+            });
+        }
+
         res.status(500).send({
             success: false,
-            message: error
-        })
-        console.log(error)
+            message: "Something went wrong",
+        });
     }
-}
+};
 
 // userLogin feature 
 
